@@ -1,5 +1,6 @@
 package test;
 
+import javax.swing.*;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -728,6 +729,164 @@ public class Main {
             return ret;
         }
 
+        public ListNode swapPairs(ListNode head) { // 24
+            ArrayList<ListNode> nodes = new ArrayList<>();
+            int count = -1;
+            while (head != null) {
+                if ((++count) % 2 == 0) {
+                    nodes.add(count, null);
+                    nodes.add(count + 1, head);
+                } else {
+                    nodes.set(count - 1, head);
+                }
+                head = head.next;
+            }
+
+            ListNode ret = null;
+            ListNode next = null;
+            for (int i = nodes.size() - 1; i >= 0; --i) {
+                ListNode node = nodes.get(i);
+                if (node == null)
+                    continue;
+                ret = node;
+                node.next = next;
+                next = node;
+            }
+            return ret;
+        }
+
+        public ListNode reverseKGroup(ListNode head, int k) { // 25
+            final ArrayList<ListNode> kList = new ArrayList<>(k);
+            ListNode ret = null;
+            int count = 0;
+            ListNode pre = null;
+            while (head != null) {
+                kList.add(head);
+                ListNode next = head.next;
+                head = head.next;
+                if (++count == k) {
+                    for (int i = count - 1; i >= 0; --i) {
+                        ListNode node = kList.get(i);
+                        if (ret == null)
+                            ret = node;
+                        node.next = i == 0 ? next : kList.get(i - 1);
+                    }
+                    if (pre != null)
+                        pre.next = kList.get(count - 1);
+                    pre = kList.get(0);
+                    count = 0;
+                    kList.clear();
+                }
+            }
+            return ret;
+        }
+
+        public int removeDuplicates(int[] nums) { // 26
+            int p = 0;
+            for (int i = 0, len = nums.length; i < len; ++i) {
+                if (nums[p] != nums[i])
+                    nums[++p] = nums[i];
+            }
+            return p + 1;
+        }
+
+        public int removeElement(int[] nums, int val) { // 27
+            int p = 0;
+            for (int i = 0, len = nums.length; i < len; ++i) {
+                if (nums[i] != val)
+                    nums[p++] = nums[i];
+            }
+            return p;
+        }
+
+        public int strStr(String haystack, String needle) { // 28
+            if (haystack == null || needle == null)
+                return -1;
+            if (needle.isEmpty())
+                return 0;
+
+            int len1 = needle.length();
+            outer:
+            for (int i = 0, len0 = haystack.length(); i < len0; ++i) {
+                if (haystack.charAt(i) == needle.charAt(0)) {
+                    for (int j = 1; j < len1; ++j) {
+                        if (i + j >= len0)
+                            return -1;
+                        if (haystack.charAt(i + j) != needle.charAt(j)) {
+                            continue outer;
+                        }
+                    }
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public int divide(int dividend, int divisor) { // 29
+            if (divisor == 1)
+                return dividend;
+            else if (divisor == -1) {
+                return dividend == Integer.MIN_VALUE ? Integer.MAX_VALUE : -dividend;
+            }
+            int ret = 0;
+            int flag = 1;
+            if (dividend < 0) {
+                flag = -flag;
+            } else {
+                dividend = -dividend;
+            }
+            if (divisor < 0) {
+                flag = -flag;
+            } else {
+                divisor = -divisor;
+            }
+            int r = dividend;
+            while (r <= divisor) {
+                r = r - divisor;
+                ++ret;
+            }
+            return flag < 0 ? -ret : ret;
+        }
+
+        public List<Integer> findSubstring(String s, String[] words) { // 30
+            if (s == null || words == null || s.isEmpty() || words.length == 0)
+                return null;
+            ArrayList<Integer> ret = new ArrayList<>();
+            final int unitLen = words[0].length();
+            final int wLen = words.length;
+            final int len = s.length();
+            for (int m = 0, mLen = len - wLen * unitLen + 1; m < mLen; ++m) {
+                int tLen = wLen;
+                for (int i = m; i < len - unitLen + 1; ) {
+                    String ts = s.substring(i, i + unitLen);
+                    int idx = -1;
+                    for (int j = 0; j < tLen; ++j) {
+                        if (ts.equals(words[j])) {
+                            idx = j;
+                            break;
+                        }
+                    }
+                    if (idx < 0) {
+                        break;
+                    } else {
+                        if (tLen == 1) {
+                            int r = i - (wLen - 1) * unitLen;
+                            if (!ret.contains(r))
+                                ret.add(r);
+                            break;
+                        } else {
+                            --tLen;
+                            String tmp = words[idx];
+                            words[idx] = words[tLen];
+                            words[tLen] = tmp;
+                            i += unitLen;
+                        }
+                    }
+                }
+            }
+            return ret;
+        }
+
     }
 
     public static void main(String[] args) {
@@ -787,11 +946,34 @@ public class Main {
 //        System.out.println(solution.mergeTwoLists(l1, l2));
 
 //        System.out.println(solution.generateParenthesis(8));
-        ListNode l1 = new ListNode(1, new ListNode(4, new ListNode(5)));
-        ListNode l2 = new ListNode(1, new ListNode(3, new ListNode(4)));
-        ListNode l3 = new ListNode(2, new ListNode(6, new ListNode(7)));
-        ListNode[] lists = {l1, l2, l3};
-        System.out.println(solution.mergeKLists(lists));
+//        ListNode l1 = new ListNode(1, new ListNode(4, new ListNode(5)));
+//        ListNode l2 = new ListNode(1, new ListNode(3, new ListNode(4)));
+//        ListNode l3 = new ListNode(2, new ListNode(6, new ListNode(7)));
+//        ListNode[] lists = {l1, l2, l3};
+//        System.out.println(solution.mergeKLists(lists));
+
+//        ListNode head = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));
+//        System.out.println(solution.swapPairs(head));
+
+//        ListNode head = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));
+//        System.out.println(solution.reverseKGroup(head, 3));
+
+//        int[] nums = new int[]{1, 2, 3};
+//        System.out.println(solution.removeDuplicates(nums));
+
+//        int[] nums = new int[]{0, 1, 2, 2, 3, 0, 4, 2};
+//        System.out.println(solution.removeElement(nums, 2));
+
+//        String haystack = "aaa", needle = "aaaa";
+//        System.out.println(solution.strStr(haystack, needle));
+
+//        System.out.println(solution.divide(5, 2));
+
+//        System.out.println(solution.findSubstring("a", new String[]{"a"}));
+        System.out.println(solution.findSubstring("wordgoodgoodgoodbestword", new String[]{"word", "good", "best", "good"}));
+//        System.out.println(solution.findSubstring("dddddddddddd", new String[]{"dddd", "dddd"}));
+//        System.out.println(solution.findSubstring("bcabbcaabbccacacbabccacaababcbb", new String[]{"c", "b", "a", "c", "a", "a", "a", "b", "c"}));
+//        System.out.println(solution.findSubstring("ababababab", new String[]{"ababa", "babab"}));
     }
 
 
