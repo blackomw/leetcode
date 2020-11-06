@@ -887,6 +887,359 @@ public class Main {
             return ret;
         }
 
+        public void nextPermutation(int[] nums) { // 31
+            final int len;
+            if (nums == null || (len = nums.length) == 1)
+                return;
+            int m = 0;
+            for (int i = len - 1; i > 0; --i) {
+                int n1 = nums[i - 1];
+                if (n1 < nums[i]) {
+                    for (int j = len - 1; j >= i; --j) {
+                        if (nums[j] > n1) {
+                            nums[i - 1] = nums[j];
+                            nums[j] = n1;
+                            break;
+                        }
+                    }
+                    m = i;
+                    break;
+                }
+            }
+            int c = (len - m) / 2;
+            for (int j = 0; j < c; ++j) {
+                int k0 = m + j, k1 = len - j - 1;
+                int t = nums[k0];
+                nums[k0] = nums[k1];
+                nums[k1] = t;
+            }
+        }
+
+        public int longestValidParentheses(String s) { // 32
+            final int len;
+            if (s == null || (len = s.length()) == 0)
+                return 0;
+            int max = 0;
+            final ArrayList<Integer> res = new ArrayList<>();
+            final ArrayList<Character> stack = new ArrayList<>();
+            for (int i = 0; i < len; ++i) {
+                char c = s.charAt(i);
+                int ssize = stack.size();
+                if (ssize > 0 && stack.get(ssize - 1) == '(' && c == ')') {
+                    stack.remove(ssize - 1);
+
+                    if (res.size() % 2 != 0) {
+                        res.add(1);
+                    } else {
+                        res.set(res.size() - 1, res.get(res.size() - 1) + 1);
+                    }
+
+                    int obIdx = res.size() - 2;
+                    int obValue = res.get(obIdx) - 1;
+                    res.set(obIdx, obValue);
+                    if (obValue == 0 && obIdx > 0) {
+                        res.set(obIdx - 1, res.get(obIdx - 1) + res.get(obIdx + 1));
+                        res.remove(obIdx + 1);
+                        res.remove(obIdx);
+                    }
+
+                    int last = res.get(res.size() - 1);
+                    if (last > max)
+                        max = last;
+                } else {
+                    stack.add(c);
+
+                    if (res.size() % 2 != 0) {
+                        res.set(res.size() - 1, res.get(res.size() - 1) + 1);
+                    } else {
+                        res.add(1);
+                    }
+                }
+            }
+            return max * 2;
+        }
+
+        public int longestValidParentheses2(String s) { // 32
+            final int len;
+            if (s == null || (len = s.length()) == 0)
+                return 0;
+            final ArrayList<Integer> stack = new ArrayList<>(len);
+            for (int i = 0; i < len; ++i) {
+                char c = s.charAt(i);
+                int ssize = stack.size();
+                if (ssize > 0 && stack.get(ssize - 1) < 0 && c == ')') {
+                    stack.remove(ssize - 1);
+                } else {
+                    stack.add(c == '(' ? -(i + 1) : i + 1);
+                }
+            }
+            int max = 0;
+            stack.add(len);
+            int ssize = stack.size();
+            int pre = 0;
+            for (int i = 0; i < ssize; ++i) {
+                int c = stack.get(i);
+                if (c < 0)
+                    c = -c;
+                int m = c - pre;
+                if (i != ssize - 1)
+                    m -= 1;
+                if (m > max)
+                    max = m;
+                pre = c;
+            }
+            return max;
+        }
+
+        public int search(int[] nums, int target) { // 33
+            final int len;
+            if (nums == null || (len = nums.length) == 0)
+                return -1;
+
+            int maxIdx = 0;
+            int low = 0, high = len - 1;
+            while (low <= high) {
+                int midIdx = (low + high) / 2;
+                int midVal = nums[midIdx];
+                if (midIdx == low) {
+                    maxIdx = midVal > nums[high] ? midIdx : high;
+                    break;
+                } else if (midIdx == high) {
+                    maxIdx = midVal > nums[low] ? midIdx : low;
+                    break;
+                }
+                int lv = nums[midIdx - 1];
+                int rv = nums[midIdx + 1];
+                if (lv < midVal && midVal < rv) {
+                    if (midVal > nums[0]) {
+                        low = midIdx;
+                    } else {
+                        high = midIdx;
+                    }
+                } else if (lv < midVal && midVal > rv) {
+                    maxIdx = midIdx;
+                    break;
+                } else if (lv > midVal && midVal < rv) {
+                    maxIdx = midIdx - 1;
+                    break;
+                }
+            }
+
+            if (target == nums[0]) {
+                return 0;
+            } else if (target == nums[len - 1]) {
+                return len - 1;
+            } else if (target == nums[maxIdx]) {
+                return maxIdx;
+            } else if (target > nums[maxIdx]) {
+                return -1;
+            } else if (target < nums[maxIdx == len - 1 ? 0 : maxIdx + 1]) {
+                return -1;
+            }
+
+            if (target > nums[0]) {
+                low = 0;
+                high = maxIdx;
+            } else {
+                low = maxIdx + 1;
+                high = len - 1;
+            }
+
+            while (low <= high) {
+                int midIdx = (low + high) / 2;
+                int midVal = nums[midIdx];
+                if (midVal < target)
+                    low = midIdx + 1;
+                else if (midVal > target)
+                    high = midIdx - 1;
+                else
+                    return midIdx;
+            }
+            return -1;
+        }
+
+        public int[] searchRange(int[] nums, int target) { // 34
+            int[] ret = new int[]{-1, -1};
+            int low = 0, high = nums.length - 1;
+            while (low <= high) {
+                int midIdx = (low + high) / 2;
+                int midVal = nums[midIdx];
+                if (midVal < target)
+                    low = midIdx + 1;
+                else if (midVal > target)
+                    high = midIdx - 1;
+                else {
+                    int min = midIdx, max = midIdx;
+                    while (--min >= 0) {
+                        if (nums[min] != target)
+                            break;
+                    }
+                    while (++max < nums.length) {
+                        if (nums[max] != target)
+                            break;
+                    }
+                    ret[0] = min + 1;
+                    ret[1] = max - 1;
+                    break;
+                }
+            }
+            return ret;
+        }
+
+        public int searchInsert(int[] nums, int target) { // 35
+            int low = 0, high = nums.length - 1;
+            while (low <= high) {
+                int mid = (low + high) / 2;
+                int midVal = nums[mid];
+                if (target > midVal) {
+                    low = mid + 1;
+                } else if (target < midVal) {
+                    high = mid - 1;
+                } else {
+                    return mid;
+                }
+            }
+            return low;
+        }
+
+        public boolean isValidSudoku(char[][] board) { // 36
+            char[] lineDups = new char[9];
+            char[] colDups = new char[9];
+            char[] blockDups = new char[9];
+            for (int i = 0; i < 9; ++i) {
+                Arrays.fill(lineDups, '.');
+                Arrays.fill(colDups, '.');
+                Arrays.fill(blockDups, '.');
+                for (int j = 0; j < 9; ++j) {
+                    char lc = board[i][j];
+                    if (lc != '.') {
+                        if (lc == lineDups[lc - '1'])
+                            return false;
+                        lineDups[lc - '1'] = lc;
+                    }
+                    char cc = board[j][i];
+                    if (cc != '.') {
+                        if (cc == colDups[cc - '1'])
+                            return false;
+                        colDups[cc - '1'] = cc;
+                    }
+                    char bc = board[(i / 3) * 3 + j / 3][(i % 3) * 3 + j % 3];
+                    if (bc != '.') {
+                        if (bc == blockDups[bc - '1'])
+                            return false;
+                        blockDups[bc - '1'] = bc;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public void solveSudoku(char[][] board) { // 37
+            int[] bt = new int[9 * 9];
+
+            for (int i = 0; i < 9; ++i) {
+                int m = i * 9;
+                for (int j = 0; j < 9; ++j) {
+                    if (board[i][j] != '.') {
+                        bt[m + j] = board[i][j] - '0';
+                    }
+                }
+            }
+
+            boolean back = false;
+            for (int i = 0; i < 9 * 9; ) {
+                if (board[i / 9][i % 9] != '.') {
+                    if (back)
+                        --i;
+                    else
+                        ++i;
+                    continue;
+                }
+
+                int next = getNext(i, bt);
+                bt[i] = next;
+                if (next == 0) {
+                    back = true;
+                    --i;
+                } else {
+                    back = false;
+                    ++i;
+                }
+            }
+
+            for (int i = 0; i < 9 * 9; ++i) {
+                board[i / 9][i % 9] = (char) (bt[i] + '0');
+            }
+
+//            StringBuilder sb = new StringBuilder(200);
+//            for (int i = 0; i < 9; ++i) {
+//                for (int j = 0; j < 9; ++j) {
+//                    sb.append(board[i][j]).append(",");
+//                }
+//                sb.append("\n");
+//            }
+//            System.out.println(sb);
+        }
+
+        int getNext(int k, int[] bt) {
+            int cur = bt[k];
+            if (cur == 9) {
+                return 0;
+            }
+            int[] tmp = new int[9];
+
+            int row = k / 9;
+            int col = k % 9;
+            int b0 = (row / 3) * 3 * 9 + (col / 3) * 3;
+
+            int rb = row * 9;
+            for (int i = 0; i < 9; ++i) {
+                int rv = bt[rb + i];
+                if (rv != 0) {
+                    tmp[rv - 1] = 1;
+                }
+
+                int cv = bt[col + i * 9];
+                if (cv != 0) {
+                    tmp[cv - 1] = 1;
+                }
+
+                int bk = b0 + (i / 3) * 9 + (i % 3);
+                int bv = bt[bk];
+                if (bv != 0) {
+                    tmp[bv - 1] = 1;
+                }
+            }
+            for (int i = cur; i < 9; ++i) {
+                if (tmp[i] == 0) {
+                    return i + 1;
+                }
+            }
+            return 0;
+        }
+
+        public String countAndSay(int n) { // 38
+            String num = "1";
+            StringBuilder next = new StringBuilder();
+            for (int i = 1; i < n; ++i) {
+                char count = '0';
+                char pre = num.charAt(0);
+                for (int j = 0; j < num.length(); ++j) {
+                    char c = num.charAt(j);
+                    if (c != pre) {
+                        next.append(count).append(pre);
+                        pre = c;
+                        count = '1';
+                    } else {
+                        ++count;
+                    }
+                }
+                num = next.append(count).append(pre).toString();
+                next.setLength(0);
+            }
+            return num;
+        }
+
     }
 
     public static void main(String[] args) {
@@ -970,10 +1323,44 @@ public class Main {
 //        System.out.println(solution.divide(5, 2));
 
 //        System.out.println(solution.findSubstring("a", new String[]{"a"}));
-        System.out.println(solution.findSubstring("wordgoodgoodgoodbestword", new String[]{"word", "good", "best", "good"}));
+//        System.out.println(solution.findSubstring("wordgoodgoodgoodbestword", new String[]{"word", "good", "best", "good"}));
 //        System.out.println(solution.findSubstring("dddddddddddd", new String[]{"dddd", "dddd"}));
 //        System.out.println(solution.findSubstring("bcabbcaabbccacacbabccacaababcbb", new String[]{"c", "b", "a", "c", "a", "a", "a", "b", "c"}));
 //        System.out.println(solution.findSubstring("ababababab", new String[]{"ababa", "babab"}));
+
+//        int[] nums = new int[]{2, 4, 3, 2, 1};
+//        solution.nextPermutation(nums);
+//        System.out.println(nums);
+
+//        System.out.println(solution.longestValidParentheses("(())((()))(()(())(()(())"));
+//        System.out.println(solution.longestValidParentheses2("(())"));
+
+//        int[] nums = new int[]{6, 5};
+//        System.out.println(solution.search(nums, 6));
+
+//        int[] nums = new int[]{1};
+//        int[] ret = solution.searchRange(nums, 0);
+//        System.out.println(ret[0] + "," + ret[1]);
+
+//        int[] nums = new int[]{};
+//        System.out.println(solution.searchInsert(nums, 0));
+
+//        char[][] board = new char[][]{
+//                {'5', '3', '.', '.', '7', '.', '.', '.', '.'},
+//                {'6', '.', '.', '1', '9', '5', '.', '.', '.'},
+//                {'.', '9', '8', '.', '.', '.', '.', '6', '.'},
+//                {'8', '.', '.', '.', '6', '.', '.', '.', '3'},
+//                {'4', '.', '.', '8', '.', '3', '.', '.', '1'},
+//                {'7', '.', '.', '.', '2', '.', '.', '.', '6'},
+//                {'.', '6', '.', '.', '.', '.', '2', '8', '.'},
+//                {'.', '.', '.', '4', '1', '9', '.', '.', '5'},
+//                {'.', '.', '.', '.', '8', '.', '.', '7', '9'}
+//        };
+//        System.out.println(solution.isValidSudoku(board));
+//        solution.solveSudoku(board);
+
+        System.out.println(solution.countAndSay(4));
+
     }
 
 
