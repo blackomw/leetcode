@@ -1240,6 +1240,338 @@ public class Main {
             return num;
         }
 
+        public List<List<Integer>> combinationSum(int[] candidates, int target) { // 39
+            final List<List<Integer>> ret = new ArrayList<>();
+            Arrays.sort(candidates);
+            final int len = candidates.length;
+
+            for (int i = 0; i < len; ++i) {
+                if (candidates[i] > target) {
+                    break;
+                }
+                List<Integer> tmp = new ArrayList<>();
+                List<Integer> idx = new ArrayList<>();
+                int cv = target;
+                for (int j = i; j < len; ) {
+                    int v = candidates[j];
+                    cv -= v;
+                    if (cv == 0) {
+                        tmp.add(v);
+                        ret.add(new ArrayList<>(tmp));
+                        cv += tmp.remove(tmp.size() - 1);
+                        if (tmp.size() > 0) {
+                            cv += tmp.remove(tmp.size() - 1);
+                            j = idx.remove(idx.size() - 1) + 1;
+                        }
+                    } else if (cv < 0) {
+                        cv += v;
+                        cv += tmp.remove(tmp.size() - 1);
+                        j = idx.remove(idx.size() - 1) + 1;
+                    } else {
+                        tmp.add(v);
+                        idx.add(j);
+                    }
+                    if (tmp.isEmpty()) {
+                        break;
+                    }
+                    while (j == len && tmp.size() > 1) {
+                        cv += tmp.remove(tmp.size() - 1);
+                        j = idx.remove(idx.size() - 1) + 1;
+                    }
+                }
+            }
+            return ret;
+        }
+
+        public List<List<Integer>> combinationSum39_2(int[] candidates, int target) { // 39-2
+            final List<List<Integer>> ret = new ArrayList<>();
+            Arrays.sort(candidates);
+            sumDFS(target, 0, candidates, new ArrayList<>(), ret);
+            return ret;
+        }
+
+        void sumDFS(int target, int from, int[] candidates, List<Integer> record, List<List<Integer>> ret) {
+            if (target <= 0) {
+                if (target == 0) {
+                    ret.add(new ArrayList<>(record));
+                }
+                return;
+            }
+
+            for (int i = from, len = candidates.length; i < len; ++i) {
+                int v = candidates[i];
+                record.add(v);
+                sumDFS(target - v, i, candidates, record, ret);
+                record.remove(record.size() - 1);
+
+                if (target <= v) {
+                    return;
+                }
+            }
+        }
+
+        public List<List<Integer>> combinationSum40(int[] candidates, int target) { // 40
+            final List<List<Integer>> ret = new ArrayList<>();
+            Arrays.sort(candidates);
+            sumDFS40(target, 0, candidates, new ArrayList<>(), ret);
+            return ret;
+        }
+
+        void sumDFS40(int target, int from, int[] candidates, List<Integer> record, List<List<Integer>> ret) {
+            if (target <= 0) {
+                if (target == 0) {
+                    ret.add(new ArrayList<>(record));
+                }
+                return;
+            }
+
+            for (int i = from, len = candidates.length; i < len; ++i) {
+                int v = candidates[i];
+                if (i > from && candidates[i - 1] == v) {
+                    continue;
+                }
+                record.add(v);
+                sumDFS40(target - v, i + 1, candidates, record, ret);
+                record.remove(record.size() - 1);
+
+                if (target <= v) {
+                    return;
+                }
+            }
+        }
+
+        public int firstMissingPositive(int[] nums) { // 41
+            final int len = nums.length;
+            for (int i = 0; i < len; ++i) {
+                int v = nums[i];
+                if (v - 1 == i || v <= 0 || v > len) {
+                    continue;
+                }
+
+                int ti = v - 1;
+                int tv = nums[ti];
+                if (tv != v) {
+                    nums[ti] = v;
+                    nums[i] = tv;
+                    --i;
+                }
+            }
+            for (int i = 0; i < len; ++i) {
+                if (nums[i] != i + 1) {
+                    return i + 1;
+                }
+            }
+            return len + 1;
+        }
+
+        public int trap(int[] height) { // 42
+            final int len = height.length;
+            ArrayList<Integer> tmp = new ArrayList<>();
+            int lv = 0, rv = -1, mv = -1;
+            int lk = -1, rk = -1;
+            for (int i = 0; i < len; ++i) {
+                int cur = height[i];
+                if (lv <= 0 || cur >= lv && mv < 0) {
+                    lv = cur;
+                    lk = i;
+                    continue;
+                }
+                if (cur < rv) {
+                    if (tmp.isEmpty()) {
+                        tmp.add(lk);
+                    }
+                    tmp.add(rk);
+
+                    lv = rv;
+                    lk = rk;
+                    mv = cur;
+                    rv = rk = -1;
+
+                    continue;
+                }
+                if (mv < 0 || cur < mv) {
+                    mv = cur;
+                    continue;
+                }
+
+                rv = cur;
+                rk = i;
+            }
+
+            if (lv >= 0 && rv >= 0) {
+                if (tmp.isEmpty()) {
+                    tmp.add(lk);
+                }
+                tmp.add(rk);
+            }
+
+            for (int i = 1, size = tmp.size(); i < size - 1; ) {
+                int tv = height[tmp.get(i)];
+                if (tv <= height[tmp.get(i - 1)] && tv <= height[tmp.get(i + 1)]) {
+                    tmp.remove(i);
+                    --size;
+                    --i;
+                    if (i < 1) {
+                        i = 1;
+                    }
+                } else {
+                    ++i;
+                }
+            }
+
+            int ret = 0;
+            for (int i = 0, size = tmp.size(); i < size - 1; ++i) {
+                int tk1 = tmp.get(i);
+                int tk2 = tmp.get(i + 1);
+                int tv1 = height[tk1];
+                int tv2 = height[tk2];
+                int v = Math.min(tv1, tv2);
+                ret += v * (tk2 - tk1 - 1);
+                for (int j = tk1 + 1; j < tk2; ++j) {
+                    ret -= Math.min(v, height[j]);
+                }
+            }
+            return ret;
+        }
+
+        public int trap2(int[] height) { // 42-2
+            final int len;
+            if (height == null || (len = height.length) == 0) {
+                return 0;
+            }
+            int[] leftMax = new int[len];
+            int[] rightMax = new int[len];
+            for (int i = 1; i < len; ++i) {
+                leftMax[i] = Math.max(height[i - 1], leftMax[i - 1]);
+            }
+            for (int i = len - 2; i >= 0; --i) {
+                rightMax[i] = Math.max(height[i + 1], rightMax[i + 1]);
+            }
+            int ret = 0;
+            for (int i = 1; i < len; ++i) {
+                ret += Math.max(Math.min(leftMax[i], rightMax[i]) - height[i], 0);
+            }
+            return ret;
+        }
+
+        public String multiply(String num1, String num2) { // 43
+            ArrayList<Character> result = new ArrayList<>();
+            for (int len = num2.length(), i = len - 1; i >= 0; --i) {
+                ArrayList<Character> arr = mulStr(num1, num2.charAt(i), len - 1 - i);
+                System.out.println(arr);
+                int arrLen = arr.size();
+                result.ensureCapacity(arrLen + 1);
+                int h = 0;
+                int j = 0;
+                for (; j < arrLen || h != 0; ++j) {
+                    boolean nb = result.size() <= j;
+                    int v = (j < arrLen ? (arr.get(j) - '0') : 0) + h;
+                    if (!nb) {
+                        v += result.get(j) - '0';
+                    }
+                    if (v > 9) {
+                        h = 1;
+                        v = v - 10;
+                    } else {
+                        h = 0;
+                    }
+                    if (!nb) {
+                        result.set(j, (char) (v + '0'));
+                    } else {
+                        result.add((char) (v + '0'));
+                    }
+                }
+            }
+
+            char[] resArr = new char[result.size()];
+            int j = 0;
+            for (int i = result.size() - 1; i >= 0; --i) {
+                resArr[j++] = result.get(i);
+            }
+            return String.valueOf(resArr);
+        }
+
+        ArrayList<Character> mulStr(String num1, char m, int z) {
+            ArrayList<Character> result = new ArrayList<>();
+            if (m == '0' || num1.equals("0")) {
+                result.add('0');
+                return result;
+            }
+            for (int i = 0; i < z; ++i) {
+                result.add('0');
+            }
+            final int mv = m - '0';
+            int h = 0;
+            for (int len = num1.length(), i = len - 1; i >= 0; --i) {
+                char c = num1.charAt(i);
+                int r = (c - '0') * mv + h;
+                result.add((char) (r % 10 + '0'));
+                h = r / 10;
+            }
+            if (h != 0) {
+                result.add((char) (h + '0'));
+            }
+            return result;
+        }
+
+        public boolean isMatch44(String s, String p) { // 44
+            return subMatch44(s, p, 0, 0, s != null ? s.length() : 0, p != null ? p.length() : 0);
+        }
+
+        boolean subMatch44(String s, String p, int si, int pi, int sLen, int pLen) {
+            if (si == sLen) {
+                for (int i = pi; i < pLen; ++i) {
+                    if (p.charAt(i) != '*') {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            if (pi == pLen) {
+                return false;
+            }
+
+            char pv = p.charAt(pi);
+            while (pv == '*') {
+                if (++pi == pLen) {
+                    return true;
+                }
+                pv = p.charAt(pi);
+            }
+            int start = pi;
+            while (pi < pLen) {
+                pv = p.charAt(pi);
+                if (pv == '*') {
+                    break;
+                }
+                ++pi;
+            }
+            int subLen = pi - start;
+            int m = (pi != pLen || start == 0) ? si : sLen - subLen;
+            if (m < si) {
+                m = si;
+            }
+            for (; m <= sLen - subLen; ++m) {
+                boolean f = true;
+                for (int n = 0; n < subLen; ++n) {
+                    char tpv = p.charAt(start + n);
+                    char tsv = s.charAt(m + n);
+                    if (tpv != '?' && tpv != tsv) {
+                        f = false;
+                        break;
+                    }
+                }
+                if (f) {
+                    return subMatch44(s, p, m + subLen, pi, sLen, pLen);
+                } else if (start == 0) {
+                    break;
+                }
+            }
+            return false;
+        }
+
+
+
     }
 
     public static void main(String[] args) {
@@ -1359,7 +1691,42 @@ public class Main {
 //        System.out.println(solution.isValidSudoku(board));
 //        solution.solveSudoku(board);
 
-        System.out.println(solution.countAndSay(4));
+//        System.out.println(solution.countAndSay(4));
+
+//        int[] nums = new int[]{2, 3, 5};
+//        System.out.println(solution.combinationSum(nums, 8));
+//        System.out.println(solution.combinationSum39_2(nums, 8));
+
+//        int[] nums = new int[]{10, 1, 2, 7, 6, 1, 5};
+//        System.out.println(solution.combinationSum40(nums, 8));
+
+//        int[] nums = new int[]{1, 2, 2, 2, 5};
+//        System.out.println(solution.combinationSum40(nums, 5));
+
+
+//        int[] nums = new int[]{13, 12, -1};
+//        System.out.println(solution.firstMissingPositive(nums));
+
+//        int[] nums = new int[]{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1};
+//        nums = new int[]{4, 2, 0, 3, 2, 5};
+//        nums = new int[]{5, 4, 1, 2};
+//        nums = new int[]{8, 8, 1, 5, 6, 2, 5, 3, 3, 9};
+//        System.out.println(solution.trap(nums));
+//        System.out.println(solution.trap2(nums));
+
+//        System.out.println(solution.multiply("0", "999"));
+
+//        System.out.println(solution.isMatch44("aa", "a"));
+//        System.out.println(solution.isMatch44("aa", "*"));
+//        System.out.println(solution.isMatch44("cb", "?a"));
+//        System.out.println(solution.isMatch44("adceb", "*a*b"));
+//        System.out.println(solution.isMatch44("aaaa", "**a"));
+//        System.out.println(solution.isMatch44("abaaabaabaaccabc", "*a***b***a***cc**b*"));
+//        System.out.println(solution.isMatch44("abbabaaabbabbaababbabbbbbabbbabbbabaaaaababababbbabababaabbababaabbbbbbaaaabababbbaabbbbaabbbbababababbaabbaababaabbbababababbbbaaabbbbbabaaaabbababbbbaababaabbababbbbbababbbabaaaaaaaabbbbbaabaaababaaaabb",
+//                "**aa*****ba*a*bb**aa*ab****a*aaaaaa***a*aaaa**bbabb*b*b**aaaaaaaaa*a********ba*bbb***a*ba*bb*bb**a*b*bb"));
+
+//        System.out.println(solution.isMatch44("abce", "abc*??"));
+        System.out.println(solution.isMatch44("aaab", "b**"));
 
     }
 
