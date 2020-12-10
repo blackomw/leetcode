@@ -1,7 +1,5 @@
 package test;
 
-import javax.swing.*;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main {
@@ -1570,7 +1568,886 @@ public class Main {
             return false;
         }
 
+        public int jump(int[] nums) { // 45
+            final int len = nums.length;
+            if (len < 2) {
+                return 0;
+            }
+            boolean[] record = new boolean[len];
+            int level = 0;
+            ArrayList<Integer> queue = new ArrayList<>();
+            queue.add(0);
+            ArrayList<Integer> subQueue = new ArrayList<>();
 
+            int qIdx = 0;
+            while (true) {
+                int nIdx = queue.get(qIdx++);
+                int v = nums[nIdx];
+                int start = nIdx + 1;
+                int end = nIdx + v;
+                if (end + 1 >= len) {
+                    break;
+                }
+                for (int i = start; i <= end; ++i) {
+                    int nv = nums[i];
+                    if (nv + i > end && !record[i]) {
+                        subQueue.add(i);
+                        record[i] = true;
+                    }
+                }
+
+                if (qIdx >= queue.size()) {
+                    ++level;
+                    queue.clear();
+                    ArrayList<Integer> tmp = queue;
+                    queue = subQueue;
+                    subQueue = tmp;
+                    qIdx = 0;
+                }
+
+            }
+            return level + 1;
+        }
+
+        public int jump45_2(int[] nums) { // 45-2
+            final int len = nums.length;
+            if (len < 2) {
+                return 0;
+            }
+
+            int jump = 1;
+            int startIdx = 1;
+            int endIdx = nums[0];
+            int maxIdx = endIdx;
+            if (maxIdx < len - 1) {
+                while (true) {
+                    ++jump;
+                    for (int i = startIdx; i <= endIdx; ++i) {
+                        maxIdx = Math.max(i + nums[i], maxIdx);
+                    }
+                    if (maxIdx >= len - 1) {
+                        break;
+                    }
+                    startIdx = endIdx + 1;
+                    endIdx = maxIdx;
+                }
+            }
+            return jump;
+        }
+
+        public List<List<Integer>> permute46(int[] nums) { // 46
+            List<List<Integer>> ret = new ArrayList<>();
+            final int len = nums.length;
+            for (int i = 0; i < len; ++i) {
+                permute46(nums, i + 1, ret);
+            }
+            return ret;
+        }
+
+        void permute46(int[] nums, int n, List<List<Integer>> ret) {
+            if (n == 1) {
+                List<Integer> rs = new ArrayList<>();
+                rs.add(nums[0]);
+                ret.add(rs);
+                return;
+            }
+            List<List<Integer>> tmp = new ArrayList<>(ret);
+            int size = tmp.size();
+            ret.clear();
+            int add = nums[n - 1];
+            for (int i = 0; i < size; ++i) {
+                List<Integer> rs = tmp.get(i);
+                rs.add(add);
+                ret.add(new ArrayList<>(rs));
+                for (int j = rs.size() - 1; j > 0; --j) {
+                    int v1 = rs.get(j);
+                    int v0 = rs.get(j - 1);
+                    rs.set(j, v0);
+                    rs.set(j - 1, v1);
+                    ret.add(new ArrayList<>(rs));
+                }
+            }
+        }
+
+        List<List<Integer>> permute46_dfs(int[] nums) {
+            List<List<Integer>> ret = new ArrayList<>();
+            final int len = nums.length;
+            List<Integer> path = new ArrayList<>();
+            boolean[] bPath = new boolean[len];
+            permute46_dfs(nums, len, path, bPath, ret);
+            return ret;
+        }
+
+        void permute46_dfs(int[] nums, int len, List<Integer> path, boolean[] bPath, List<List<Integer>> ret) {
+            if (path.size() == len) {
+                ret.add(new ArrayList<>(path));
+                return;
+            }
+            for (int i = 0; i < len; ++i) {
+                if (bPath[i]) {
+                    continue;
+                }
+                path.add(nums[i]);
+                bPath[i] = true;
+                permute46_dfs(nums, len, path, bPath, ret);
+                bPath[i] = false;
+                path.remove(path.size() - 1);
+            }
+        }
+
+        public List<List<Integer>> permuteUnique(int[] nums) { // 47
+            Arrays.sort(nums);
+            List<List<Integer>> ret = new ArrayList<>();
+            final int len = nums.length;
+            List<Integer> path = new ArrayList<>();
+            boolean[] bPath = new boolean[len];
+            permute47_dfs(nums, len, path, bPath, ret);
+            return ret;
+        }
+
+        void permute47_dfs(int[] nums, int len, List<Integer> path, boolean[] bPath, List<List<Integer>> ret) {
+            if (path.size() == len) {
+                ret.add(new ArrayList<>(path));
+                return;
+            }
+            int pre = Integer.MAX_VALUE;
+            for (int i = 0; i < len; ++i) {
+                if (bPath[i]) {
+                    continue;
+                }
+                int v = nums[i];
+                if (v == pre) {
+                    continue;
+                }
+                pre = v;
+                path.add(v);
+                bPath[i] = true;
+                permute47_dfs(nums, len, path, bPath, ret);
+                bPath[i] = false;
+                path.remove(path.size() - 1);
+            }
+        }
+
+        public void rotate(int[][] matrix) { // 48
+            final int n = matrix.length;
+            if (n < 2) {
+                return;
+            }
+            int e = n / 2;
+            for (int m = 0; m < e; ++m) {
+                int min = m;
+                int max = n - 2 * m + min - 1;
+
+                int v0 = matrix[min][min];
+                matrix[min][min] = matrix[max][min];
+                matrix[max][min] = matrix[max][max];
+                matrix[max][max] = matrix[min][max];
+                matrix[min][max] = v0;
+                for (int i = min + 1; i < max; ++i) {
+                    int vi = matrix[min][i];
+                    int offset = max - i + m;
+                    matrix[min][i] = matrix[offset][min];
+                    matrix[offset][min] = matrix[max][offset];
+                    matrix[max][offset] = matrix[i][max];
+                    matrix[i][max] = vi;
+                }
+            }
+        }
+
+        public List<List<String>> groupAnagrams(String[] strs) { // 49
+            HashMap<String, List<String>> tmp = new HashMap<>();
+            final int len = strs.length;
+            for (int i = 0; i < len; i++) {
+                String s = strs[i];
+                byte[] sa = s.getBytes();
+                Arrays.sort(sa);
+                String ts = new String(sa);
+                List<String> r = tmp.computeIfAbsent(ts, k -> new ArrayList<>());
+                r.add(s);
+            }
+            return new ArrayList<>(tmp.values());
+        }
+
+        public double myPow(double x, int n) { // 50
+            if (x == 0) {
+                return 0;
+            }
+            if (x == 1) {
+                return x;
+            }
+            if (n == 0) {
+                return 1;
+            }
+            long pn = n < 0 ? -(long) n : n;
+            double r = 1;
+            double pre = x;
+            while (pn != 0) {
+                if ((pn & 1) != 0) {
+                    r *= pre;
+                }
+                pre *= pre;
+                pn >>= 1;
+            }
+            if (n < 0) {
+                r = 1 / r;
+            }
+            return r;
+        }
+
+        public List<List<String>> solveNQueens(int n) { // 51
+            List<List<String>> ret = new ArrayList<>();
+            char[][] arr = new char[n][n];
+            for (int i = 0; i < n; ++i) {
+                Arrays.fill(arr[i], '.');
+            }
+            queen(n, 0, arr, ret);
+            return ret;
+        }
+
+        void queen(int n, int row, char[][] arr, List<List<String>> ret) {
+            if (row == n) {
+                List<String> s = new ArrayList<>(n);
+                ret.add(s);
+                for (int i = 0; i < n; ++i) {
+                    s.add(new String(arr[i]));
+                }
+                return;
+            }
+
+            outer:
+            for (int col = 0; col < n; ++col) {
+                for (int i = 0; i < n; ++i) { // column check
+                    if (arr[i][col] == 'Q') {
+                        continue outer;
+                    }
+                }
+                for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; --i, --j) { // top-left check
+                    if (arr[i][j] == 'Q') {
+                        continue outer;
+                    }
+                }
+                for (int i = row - 1, j = col + 1; i >= 0 && j < n; --i, ++j) { // top-right check
+                    if (arr[i][j] == 'Q') {
+                        continue outer;
+                    }
+                }
+
+                arr[row][col] = 'Q';
+                queen(n, row + 1, arr, ret);
+                arr[row][col] = '.';
+            }
+        }
+
+        public int totalNQueens(int n) { // 52
+            if (n < 2) {
+                return n;
+            }
+            boolean[][] arr = new boolean[n][n];
+            int[] ret = new int[1];
+            queen(n, 0, arr, ret);
+            return ret[0];
+        }
+
+        void queen(int n, int row, boolean[][] arr, int[] ret) {
+            if (row == n) {
+                ret[0] += 1;
+                return;
+            }
+
+            outer:
+            for (int col = 0; col < n; ++col) {
+                for (int i = 0; i < n; ++i) { // column check
+                    if (arr[i][col]) {
+                        continue outer;
+                    }
+                }
+                for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; --i, --j) { // top-left check
+                    if (arr[i][j]) {
+                        continue outer;
+                    }
+                }
+                for (int i = row - 1, j = col + 1; i >= 0 && j < n; --i, ++j) { // top-right check
+                    if (arr[i][j]) {
+                        continue outer;
+                    }
+                }
+
+                arr[row][col] = true;
+                queen(n, row + 1, arr, ret);
+                arr[row][col] = false;
+            }
+        }
+
+        public int maxSubArray(int[] nums) { // 53
+            int maxSum = Integer.MIN_VALUE;
+            int sum = 0;
+            for (int i = 0, len = nums.length; i < len; ++i) {
+                sum += nums[i];
+                if (sum > maxSum) {
+                    maxSum = sum;
+                }
+                if (sum <= 0) {
+                    sum = 0;
+                }
+            }
+            return maxSum;
+        }
+
+        public List<Integer> spiralOrder(int[][] matrix) { // 54
+            int m = matrix.length;
+            int n = matrix[0].length;
+            List<Integer> ret = new ArrayList<>(m * n);
+            int hr = Math.min(m / 2 + m % 2, n / 2 + n % 2);
+            for (int i = 0; i < hr; i++) {
+                int c1 = n - i - 1;
+                int r1 = m - i - 1;
+                for (int ci = i; ci <= c1; ++ci) {
+                    ret.add(matrix[i][ci]);
+                }
+                for (int ri = i + 1; ri <= r1 - 1; ++ri) {
+                    ret.add(matrix[ri][c1]);
+                }
+                if (r1 != i) {
+                    for (int ci = c1; ci >= i; --ci) {
+                        ret.add(matrix[r1][ci]);
+                    }
+                }
+                if (c1 != i) {
+                    for (int ri = r1 - 1; ri >= i + 1; --ri) {
+                        ret.add(matrix[ri][i]);
+                    }
+                }
+            }
+            return ret;
+        }
+
+        public boolean canJump(int[] nums) { // 55
+            final int len = nums.length;
+            int start = 0;
+            int end = nums[0];
+            int max = Math.max(start, end);
+            while (true) {
+                if (max + 1 >= len) {
+                    return true;
+                }
+                for (int i = start + 1; i <= end; i++) {
+                    max = Math.max(max, i + nums[i]);
+                }
+                if (max <= end) {
+                    return false;
+                }
+                start = end;
+                end = max;
+            }
+        }
+
+        public int[][] merge(int[][] intervals) { // 56
+            int len = intervals.length;
+            Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+
+            int count = len;
+            int preIdx = -1;
+            int pre1 = 0;
+            for (int i = 0; i < len; ++i) {
+                int v0 = intervals[i][0];
+                int v1 = intervals[i][1];
+                if (preIdx < 0 || v0 > pre1) {
+                    preIdx = i;
+                    pre1 = v1;
+                    continue;
+                }
+
+                pre1 = Math.max(v1, pre1);
+                intervals[preIdx][1] = pre1;
+                intervals[i] = null;
+                --count;
+            }
+
+            int j = 0;
+            int[][] ret = new int[count][2];
+            for (int i = 0; i < len; i++) {
+                if (intervals[i] != null) {
+                    ret[j++] = intervals[i];
+                }
+            }
+            return ret;
+        }
+
+        public int[][] insert(int[][] intervals, int[] newInterval) { // 57
+            int len = intervals.length;
+            int n0 = newInterval[0], n1 = newInterval[1];
+            int li = -1, ri = len - 1;
+            for (int i = 0; i < len; i++) {
+                if (n0 > intervals[i][1]) {
+                    continue;
+                }
+                if (li < 0) {
+                    li = i;
+                }
+                if (n1 <= intervals[i][1]) {
+                    if (n1 >= intervals[i][0]) {
+                        ri = i;
+                    } else {
+                        ri = i - 1;
+                    }
+                    break;
+                }
+            }
+
+            if (li < 0) {
+                int[][] ret = Arrays.copyOf(intervals, len + 1);
+                ret[len] = newInterval;
+                return ret;
+            }
+
+            int[][] ret = new int[len - (ri - li)][2];
+            newInterval[0] = Math.min(intervals[li][0], n0);
+            newInterval[1] = ri < 0 ? n1 : Math.max(intervals[ri][1], n1);
+            int j = 0;
+            for (int i = 0; i < li; ++i) {
+                ret[j++] = intervals[i];
+            }
+            ret[j++] = newInterval;
+            for (int i = ri + 1; i < len; ++i) {
+                ret[j++] = intervals[i];
+            }
+            return ret;
+        }
+
+        public int lengthOfLastWord(String s) { // 58
+            int lastIdx = -1;
+            for (int i = s.length() - 1; i >= 0; --i) {
+                char c = s.charAt(i);
+                if (c == ' ' && lastIdx >= 0) {
+                    return lastIdx - i;
+                } else if (c != ' ' && lastIdx < 0) {
+                    lastIdx = i;
+                }
+            }
+            return lastIdx < 0 ? 0 : lastIdx + 1;
+        }
+
+        public int[][] generateMatrix(int n) { // 59
+            int[][] ret = new int[n][n];
+            int count = n / 2 + n % 2;
+            int v = 0;
+            for (int i = 0; i < count; ++i) {
+                int mc = n - i - 1;
+                for (int c = i; c <= mc; ++c) {
+                    ret[i][c] = ++v;
+                }
+                for (int r = i + 1; r <= mc - 1; ++r) {
+                    ret[r][mc] = ++v;
+                }
+                if (mc != i) {
+                    for (int c = mc; c >= i; --c) {
+                        ret[mc][c] = ++v;
+                    }
+                }
+                for (int r = mc - 1; r >= i + 1; --r) {
+                    ret[r][i] = ++v;
+                }
+            }
+            return ret;
+        }
+
+        public String getPermutation(int n, int k) { // 60
+            int[] ck = new int[1];
+            char[] ret = new char[n];
+            boolean[] used = new boolean[n];
+            permutation_60(n, k, 0, ck, ret, used);
+            return String.valueOf(ret);
+        }
+
+        boolean permutation_60(int n, int k, int cn, int[] ck, char[] ret, boolean[] used) {
+            if (cn == n) {
+                ck[0] = ck[0] + 1;
+                if (ck[0] == k) {
+                    return true;
+                }
+                return false;
+            }
+
+            for (int i = 0; i < n; i++) {
+                if (!used[i]) {
+                    used[i] = true;
+                    ret[cn++] = (char) (i + '1');
+                    if (permutation_60(n, k, cn, ck, ret, used)) {
+                        return true;
+                    }
+                    ret[--cn] = 0;
+                    used[i] = false;
+                }
+            }
+            return false;
+        }
+
+        public String getPermutation_60_2(int n, int k) { // 60
+            char[] ret = new char[n];
+            boolean[] used = new boolean[n];
+            int[] totals = new int[n];
+            int total = 1;
+            for (int i = 0; i < n; ++i) {
+                total *= i + 1;
+                totals[i] = total;
+            }
+            getPermutation_60_2(n, k, totals, ret, used);
+            return String.valueOf(ret);
+        }
+
+        void getPermutation_60_2(int n, int k, int[] totals, char[] ret, boolean[] used) {
+            int total = n < 2 ? 1 : totals[n - 2];
+            int m = k % total;
+            int c = k / total + (m == 0 ? 0 : 1);
+            k = m == 0 ? total : m;
+            int len = ret.length;
+            for (int i = 0; i < len; ++i) {
+                if (!used[i] && --c == 0) {
+                    ret[len - n] = (char) (i + '1');
+                    used[i] = true;
+                    if (n > 1) {
+                        getPermutation_60_2(n - 1, k, totals, ret, used);
+                    }
+                    return;
+                }
+            }
+        }
+
+        public ListNode rotateRight(ListNode head, int k) { // 61
+            if (head == null || head.next == null) {
+                return head;
+            }
+            int count = 0;
+            ListNode node = head;
+            while (true) {
+                ++count;
+                ListNode n = node.next;
+                if (n == null) {
+                    node.next = head;
+                    break;
+                }
+                node = n;
+            }
+            k = count - k % count;
+            while (--k >= 0) {
+                node = node.next;
+            }
+            head = node.next;
+            node.next = null;
+            return head;
+        }
+
+        public int uniquePaths(int m, int n) { // 62 C(m-1+n-1, n-1)
+            long ret = 1;
+            int m0 = m - 1;
+            int n0 = n - 1;
+            int total = m0 + n0;
+            int min = Math.min(m0, n0);
+            long tmp = 1;
+            for (int i = 0; i < min; i++) {
+                ret *= total - i;
+                tmp *= min - i;
+            }
+            return (int) (ret / tmp);
+        }
+
+        public int uniquePaths_62_2(int m, int n) { // 62-2
+            int[] count = new int[1];
+            paths_62_2(m - 1, n - 1, count);
+            return count[0];
+        }
+
+        void paths_62_2(int right, int down, int[] count) {
+            if (right == 0 || down == 0) {
+                count[0] += 1;
+                return;
+            }
+            paths_62_2(right - 1, down, count);
+            paths_62_2(right, down - 1, count);
+        }
+
+        public int paths_62_3(int m, int n) {
+            int[][] dp = new int[m][n];
+            dp[0][0] = 0;
+            Arrays.fill(dp[0], 1);
+            for (int i = 1; i < m; ++i) {
+                dp[i][0] = 1;
+            }
+            for (int j = 1; j < n; ++j) {
+                for (int i = 1; i < m; ++i) {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+            return dp[m - 1][n - 1];
+        }
+
+        public int uniquePathsWithObstacles(int[][] obstacleGrid) { // 63
+            int m = obstacleGrid.length;
+            int n = obstacleGrid[0].length;
+            int[][] dp = new int[m][n];
+            dp[0][0] = obstacleGrid[0][0] == 0 ? 1 : 0;
+            for (int i = 1; i < n; ++i) {
+                if (obstacleGrid[0][i] == 0)
+                    dp[0][i] = dp[0][i - 1];
+            }
+            for (int i = 1; i < m; ++i) {
+                if (obstacleGrid[i][0] == 0)
+                    dp[i][0] = dp[i - 1][0];
+            }
+            for (int j = 1; j < n; ++j) {
+                for (int i = 1; i < m; ++i) {
+                    if (obstacleGrid[i][j] == 0) {
+                        dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                    }
+                }
+            }
+            return dp[m - 1][n - 1];
+        }
+
+        public int minPathSum(int[][] grid) { // 64
+            int m = grid.length;
+            int n = grid[0].length;
+            int[][] dp = new int[m][n];
+            for (int i = 0; i < m; i++) {
+                dp[i][0] = grid[i][0] + (i != 0 ? dp[i - 1][0] : 0);
+            }
+            for (int i = 0; i < n; i++) {
+                dp[0][i] = grid[0][i] + (i != 0 ? dp[0][i - 1] : 0);
+            }
+            for (int i = 1; i < m; i++) {
+                for (int j = 1; j < n; j++) {
+                    dp[i][j] = grid[i][j] + Math.min(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+            return dp[m - 1][n - 1];
+        }
+
+        public boolean isNumber(String s) { // 65
+            // -2.5e-4
+            return validNumber(s.trim(), 0, -2, 0);
+        }
+
+        boolean validNumber(String s, int pos, int dot, int e) {
+            final int len = s.length();
+            boolean num = false;
+            int sign = -2;
+            for (int i = pos; i < len; ++i) {
+                char c = s.charAt(i);
+                if (c >= '0' && c <= '9') {
+                    if (sign < -1) {
+                        sign = i - 1;
+                    }
+                    num = true;
+                } else if (c == '+' || c == '-') {
+                    if (sign >= -1) {
+                        return false;
+                    }
+                    sign = i;
+                    char afterSign;
+                    if (sign == len - 1 || ((afterSign = s.charAt(sign + 1)) != '.' && (afterSign > '9' || afterSign < '0'))) {
+                        return false;
+                    }
+                } else if (c == '.') {
+//                    char afterDot;
+                    if (dot >= -1) { //|| i == len - 1 || (afterDot = s.charAt(i + 1)) > '9' || afterDot < '0') {
+                        return false;
+                    }
+                    if (sign < -1) {
+                        sign = -1;
+                    }
+                    dot = i;
+                } else if (c == 'e') {
+                    char preE;
+                    if (!num || e > 0 || ((preE = s.charAt(i - 1)) != '.' && (preE > '9' || preE < '0'))) {
+                        return false;
+                    }
+                    e = i;
+                    return validNumber(s, i + 1, -1, e);
+                } else {
+                    return false;
+                }
+            }
+            return num;
+        }
+
+        public int[] plusOne(int[] digits) { // 66
+            final int len = digits.length;
+            int h = 0;
+            for (int i = len - 1; i >= 0; --i) {
+                int v = digits[i] + h;
+                if (i == len - 1) {
+                    ++v;
+                }
+                if (v > 9) {
+                    h = 1;
+                    v -= 10;
+                } else {
+                    h = 0;
+                }
+                digits[i] = v;
+            }
+            if (h != 0) {
+                int[] ret = new int[len + 1];
+                ret[0] = h;
+                for (int i = 0; i < len; ++i) {
+                    ret[i + 1] = digits[i];
+                }
+                return ret;
+            }
+            return digits;
+        }
+
+        public String addBinary(String a, String b) { // 67
+            String ret = "";
+            int h = 0;
+            for (int i = a.length() - 1, j = b.length() - 1; i >= 0 || j >= 0; --i, --j) {
+                int v = h;
+                if (i >= 0) {
+                    v += a.charAt(i) - '0';
+                }
+                if (j >= 0) {
+                    v += b.charAt(j) - '0';
+                }
+                if (v == 3) {
+                    h = 1;
+                    v = 1;
+                } else if (v == 2) {
+                    h = 1;
+                    v = 0;
+                } else {
+                    h = 0;
+                }
+                ret = v + ret;
+            }
+            if (h != 0) {
+                ret = h + ret;
+            }
+            return ret;
+        }
+
+        public List<String> fullJustify(String[] words, int maxWidth) { // 68
+            ArrayList<String> ret = new ArrayList<>();
+            final int len = words.length;
+            ArrayList<Integer> wCounts = new ArrayList<>();
+            int curLen = 0;
+            for (int i = 0; i < len; ++i) {
+                int wordLen = words[i].length();
+                if (curLen != 0) {
+                    curLen += 1;
+                }
+                curLen += wordLen;
+                if (curLen > maxWidth) {
+                    wCounts.add(i - 1);
+                    curLen = wordLen;
+                }
+            }
+
+            int last = -1;
+            for (int i = 0, size = wCounts.size(); i < size; ++i) {
+                int start = i == 0 ? 0 : wCounts.get(i - 1) + 1;
+                int end = last = wCounts.get(i);
+                int sp = end - start;
+                int minLen = 0;
+                for (int j = start; j <= end; ++j) {
+                    minLen += words[j].length();
+                }
+                int es = maxWidth - minLen;
+                StringBuilder sb = new StringBuilder();
+                if (sp == 0) {
+                    sb.append(words[start]).append(" ".repeat(es));
+                } else {
+                    int avg = es / sp;
+                    int left = es % sp;
+                    String ts = " ".repeat(avg);
+                    for (int j = start; j <= end; ++j) {
+                        sb.append(words[j]);
+                        if (j != end) {
+                            sb.append(ts);
+                        }
+                        if (--left >= 0) {
+                            sb.append(" ");
+                        }
+                    }
+                }
+                ret.add(sb.toString());
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = last + 1; i < len; ++i) {
+                sb.append(words[i]);
+                if (i != len - 1) {
+                    sb.append(" ");
+                }
+            }
+            sb.append(" ".repeat(maxWidth - sb.length()));
+            ret.add(sb.toString());
+            return ret;
+        }
+
+        public int mySqrt(int x) { // 69
+            int low = 1, high = x;
+            int mid = (int) (((long) low + high) / 2);
+            int pre = mid;
+            while (low < high) {
+                long v = (long) mid * mid;
+                if (v > x) {
+                    high = mid;
+                } else if (v < x) {
+                    low = mid;
+                } else {
+                    return mid;
+                }
+                pre = mid;
+                mid = (low + high) / 2;
+                if (pre == mid) {
+                    pre = mid;
+                    break;
+                }
+            }
+            return pre;
+        }
+
+        public int climbStairs(int n) { // 70
+            long ret = 0;
+            int c = n / 2 + n % 2;
+            for (int i = n; i >= c; --i) {
+                ret += c(i, n - i);
+            }
+            return (int) ret;
+        }
+
+        long c(int n, int m) { // c(n,m) = n!/(n-m)!m!
+            long ret = 1;
+            int min = Math.min(m, n - m);
+            long tmp = 1;
+            for (int i = 0; i < min; i++) {
+                ret *= n - i;
+                tmp *= min - i;
+                if (ret % tmp == 0) {
+                    ret = ret / tmp;
+                    tmp = 1;
+                }
+            }
+            return ret / tmp;
+        }
+
+        public int climbStairs2(int n) { // 70-2
+            if (n == 1) {
+                return 1;
+            } else if (n == 2) {
+                return 2;
+            }
+            return climbStairs2(n - 1) + climbStairs2(n - 2);
+        }
+
+        public int climbStairs3(int n) { // 70-3
+            int[] dp = new int[n + 1];
+            dp[0] = 1;
+            dp[1] = 1;
+            for (int i = 2; i <= n; ++i) {
+                dp[i] = dp[i - 1] + dp[i - 2];
+            }
+            return dp[n];
+        }
 
     }
 
@@ -1726,9 +2603,153 @@ public class Main {
 //                "**aa*****ba*a*bb**aa*ab****a*aaaaaa***a*aaaa**bbabb*b*b**aaaaaaaaa*a********ba*bbb***a*ba*bb*bb**a*b*bb"));
 
 //        System.out.println(solution.isMatch44("abce", "abc*??"));
-        System.out.println(solution.isMatch44("aaab", "b**"));
+//        System.out.println(solution.isMatch44("aaab", "b**"));
+
+//        System.out.println(solution.jump(new int[]{2, 3, 1, 1, 4}));
+//        System.out.println(solution.jump(new int[]{8, 2, 4, 4, 4, 9, 5, 2, 5, 8, 8, 0, 8, 6, 9, 1, 1, 6, 3, 5, 1, 2, 6, 6, 0, 4, 8, 6, 0, 3, 2, 8, 7, 6, 5, 1, 7, 0, 3, 4, 8, 3, 5, 9, 0, 4, 0, 1, 0, 5, 9, 2, 0, 7, 0, 2, 1, 0, 8, 2, 5, 1, 2, 3, 9, 7, 4, 7, 0, 0, 1, 8, 5, 6, 7, 5, 1, 9, 9, 3, 5, 0, 7, 5}));
+
+//        System.out.println(solution.jump45_2(new int[]{2, 3, 1, 1, 4}));
+//        System.out.println(solution.jump45_2(new int[]{8, 2, 4, 4, 4, 9, 5, 2, 5, 8, 8, 0, 8, 6, 9, 1, 1, 6, 3, 5, 1, 2, 6, 6, 0, 4, 8, 6, 0, 3, 2, 8, 7, 6, 5, 1, 7, 0, 3, 4, 8, 3, 5, 9, 0, 4, 0, 1, 0, 5, 9, 2, 0, 7, 0, 2, 1, 0, 8, 2, 5, 1, 2, 3, 9, 7, 4, 7, 0, 0, 1, 8, 5, 6, 7, 5, 1, 9, 9, 3, 5, 0, 7, 5}));
+
+//        System.out.println(solution.permute46(new int[]{1, 2, 3}));
+//        System.out.println(solution.permute46_dfs(new int[]{1, 2, 3}));
+
+//        System.out.println(solution.permuteUnique(new int[]{1, 2, 1, 1}));
+
+//        int[][] matrix = new int[][]{
+//                {1, 2, 3},
+//                {4, 5, 6},
+//                {7, 8, 9},
+//        };
+//        int[][] matrix = new int[][]{
+//                {5, 1, 9, 11},
+//                {2, 4, 8, 10},
+//                {13, 3, 6, 7},
+//                {15, 14, 12, 16}
+//        };
+//        int[][] matrix = new int[][]{
+//                {1, 2},
+//                {3, 4},
+//        };
+//        int[][] matrix = new int[][]{
+//                {1, 2, 3, 4, 5},
+//                {6, 7, 8, 9, 10},
+//                {11, 12, 13, 14, 15},
+//                {16, 17, 18, 19, 20},
+//                {21, 22, 23, 24, 25}};
+//        int len = matrix.length;
+//        solution.rotate(matrix);
+//        for (int i = 0; i < len; i++) {
+//            for (int j = 0; j < len; j++) {
+//                System.out.print(matrix[i][j] + ", ");
+//            }
+//            System.out.println();
+//        }
+
+//        String[] strs = new String[]{"eat", "tea", "tan", "ate", "nat", "bat"};
+//        System.out.println(solution.groupAnagrams(strs));
+
+//        System.out.println(solution.myPow(2, 11));
+//        System.out.println(Math.pow(2, 11));
+
+//        System.out.println(solution.solveNQueens(12));
+
+//        System.out.println(solution.totalNQueens(4));
+
+//        System.out.println(solution.maxSubArray(new int[]{-2, 1, -3, 4, -1, 2, 1, -5, 4}));
+
+//        int[][] matrix = new int[][]{
+//                {1, 2, 3},
+//                {4, 5, 6},
+//                {7, 8, 9},
+//        };
+//        int[][] matrix = new int[][]{
+//                {1, 4},
+//                {5, 8},
+//                {9, 12},
+//                {10, 11},
+//                {13, 14}
+//        };
+//        int[][] matrix = new int[][]{{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}};
+//        int[][] matrix = new int[][]{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}};
+//        System.out.println(solution.spiralOrder(matrix));
+
+//        System.out.println(solution.canJump(new int[]{3, 2, 1, 0, 4}));
+
+//        int[][] matrix = new int[][]{{3, 6}};
+//        System.out.println(solution.merge(matrix));
+
+//        int[][] matrix0 = new int[][]{{2, 4}, {7, 9}, {12, 18}};
+//        int[] matrix1 = new int[]{125, 130};
+//        int[][] ret = solution.insert(matrix0, matrix1);
+//        for (int i = 0, len = ret.length; i < len; i++) {
+//            System.out.print(ret[i][0] + "," + ret[i][1] + "; ");
+//        }
+
+//        System.out.println(solution.lengthOfLastWord(" a  "));
+
+//        int[][] ret = solution.generateMatrix(6);
+//        for (int i = 0, len = ret.length; i < len; i++) {
+//            for (int j = 0; j < len; j++) {
+//                System.out.print(ret[i][j] + ",");
+//            }
+//            System.out.println();
+//        }
+
+//        System.out.println(solution.getPermutation(8, 20));
+//        System.out.println(solution.getPermutation_60_2(8, 20));
+
+//        ListNode head = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));
+//        ListNode head = new ListNode(1);
+//        System.out.println(solution.rotateRight(head, 6));
+
+//        System.out.println(solution.uniquePaths(51, 9));
+//        System.out.println(solution.uniquePaths_62_2(51, 9));
+//        System.out.println(solution.paths_62_3(51, 9));
+
+//        int[][] obstacleGrid = {{0, 1, 0, 0, 0}, {1, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}};
+//        int[][] obstacleGrid = {{1,0}};
+//        int[][] obstacleGrid = {{0, 0, 0}, {0, 1, 0}, {0, 0, 0}};
+//        System.out.println(solution.uniquePathsWithObstacles(obstacleGrid));
+
+//        int[][] grid = {{1, 1}};
+//        System.out.println(solution.minPathSum(grid));
+
+//        System.out.println(solution.isNumber("0"));
+//        System.out.println(solution.isNumber(" 0.1 "));
+//        System.out.println(solution.isNumber("abc"));
+//        System.out.println(solution.isNumber("1 a"));
+//        System.out.println(solution.isNumber("2e10"));
+//        System.out.println(solution.isNumber(" -90e3   "));
+//        System.out.println(solution.isNumber(" 1e"));
+//        System.out.println(solution.isNumber("e3"));
+//        System.out.println(solution.isNumber(" 6e-1"));
+//        System.out.println(solution.isNumber(" 99e2.5 "));
+//        System.out.println(solution.isNumber("53.5e93"));
+//        System.out.println(solution.isNumber(" --6 "));
+//        System.out.println(solution.isNumber("-+3"));
+//        System.out.println(solution.isNumber("95a54e53"));
+//        System.out.println(solution.isNumber("+.8"));
+//        System.out.println(solution.isNumber("46.e3"));
+
+//        int[] digits = {9, 9};
+//        System.out.println(solution.plusOne(digits));
+
+//        System.out.println(solution.addBinary("1111", "1111"));
+
+//        System.out.println(solution.fullJustify(new String[]{"This", "is", "an", "example", "of", "text", "justification."}, 16));
+//        System.out.println(solution.fullJustify(new String[]{"What", "must", "be", "acknowledgment", "shall", "be"}, 16));
+//        System.out.println(solution.fullJustify(new String[]{"What", "shall", "be"}, 26));
+
+//        System.out.println(solution.mySqrt(2147483647));
+//        System.out.println(Math.sqrt(2147483647));
+
+        System.out.println(solution.climbStairs(45));
+        System.out.println(solution.climbStairs2(45));
+        System.out.println(solution.climbStairs3(45));
 
     }
 
 
 }
+
