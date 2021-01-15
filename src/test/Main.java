@@ -2449,6 +2449,384 @@ public class Main {
             return dp[n];
         }
 
+        public String simplifyPath(String path) { // 71
+            ArrayList<String> stack = new ArrayList<>();
+            final int len = path.length();
+            int start = -1, end = -1;
+            for (int i = 0; i < len; i++) {
+                char c = path.charAt(i);
+                if (c != '/') {
+                    if (start == -1) {
+                        start = end = i;
+                    } else {
+                        end = i;
+                    }
+                }
+                if ((i == len - 1 || c == '/') && start != -1) {
+                    String s = path.substring(start, end + 1);
+                    if (s.equals("..")) {
+                        if (!stack.isEmpty()) {
+                            stack.remove(stack.size() - 1);
+                        }
+                    } else if (!s.equals(".")) {
+                        stack.add(s);
+                    }
+                    start = end = -1;
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            for (String value : stack) {
+                sb.append("/").append(value);
+            }
+            return sb.length() == 0 ? "/" : sb.toString();
+        }
+
+        public int minDistance(String word1, String word2) { // 72
+            final int len1 = word1.length();
+            final int len2 = word2.length();
+            final int[][] dp = new int[len1 + 1][len2 + 1];
+            dp[0][0] = 0;
+            for (int i = 1; i <= len1; i++) {
+                dp[i][0] = i;
+            }
+            for (int i = 1; i <= len2; i++) {
+                dp[0][i] = i;
+            }
+            for (int i = 1; i <= len1; i++) {
+                for (int j = 1; j <= len2; j++) {
+                    if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    } else {
+                        dp[i][j] = Math.min(Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1), dp[i - 1][j - 1] + 1);
+                    }
+                }
+            }
+            return dp[len1][len2];
+        }
+
+        public void setZeroes(int[][] matrix) { // 73
+            final int m = matrix.length;
+            final int n = matrix[0].length;
+            final ArrayList<Integer> p = new ArrayList<>();
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; ++j) {
+                    if (matrix[i][j] == 0) {
+                        p.add(i);
+                        p.add(j);
+                    }
+                }
+            }
+            for (int i = 0, s = p.size(); i < s - 1; i += 2) {
+                int r = p.get(i);
+                int c = p.get(i + 1);
+                for (int j = 0; j < n; ++j) {
+                    matrix[r][j] = 0;
+                }
+                for (int j = 0; j < m; ++j) {
+                    matrix[j][c] = 0;
+                }
+            }
+        }
+
+        public boolean searchMatrix(int[][] matrix, int target) { // 74
+            final int m = matrix.length;
+            if (m == 0) {
+                return false;
+            }
+            final int n = matrix[0].length;
+            if (n == 0) {
+                return false;
+            }
+            int cLo = 0;
+            int cHi = m - 1;
+            while (cLo <= cHi) {
+                int cMid = (cLo + cHi) / 2;
+                int mv = matrix[cMid][0];
+                if (target > mv) {
+                    cLo = cMid + 1;
+                } else if (target < mv) {
+                    cHi = cMid - 1;
+                } else {
+                    return true;
+                }
+            }
+            if (cHi < 0) {
+                return false;
+            }
+            int rLo = 0;
+            int rHi = n - 1;
+            while (rLo <= rHi) {
+                int rMid = (rLo + rHi) / 2;
+                int mv = matrix[cHi][rMid];
+                if (target > mv) {
+                    rLo = rMid + 1;
+                } else if (target < mv) {
+                    rHi = rMid - 1;
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void sortColors(int[] nums) { // 75
+            final int len = nums.length;
+            if (len < 2) {
+                return;
+            }
+            int v0 = 0, v1 = 0;
+            for (int i = 0; i < len; i++) {
+                int v = nums[i];
+                if (v == 0) {
+                    ++v0;
+                } else if (v == 1) {
+                    ++v1;
+                }
+            }
+            for (int i = 0; i < v0; i++) {
+                nums[i] = 0;
+            }
+            int s = v0 + v1;
+            for (int i = v0; i < s; i++) {
+                nums[i] = 1;
+            }
+            for (int i = s; i < len; i++) {
+                nums[i] = 2;
+            }
+        }
+
+        public String minWindow(String s, String t) { // 76  TODO
+            if (t == null || t.isEmpty() || s == null || s.isEmpty())
+                return "";
+            HashMap<Character, Integer> tMap = new HashMap<>();
+            for (int i = 0, tLen = t.length(); i < tLen; i++) {
+                char c = t.charAt(i);
+                Integer v = tMap.get(c);
+                if (v == null) {
+                    v = 0;
+                }
+                tMap.put(c, ++v);
+            }
+            int start = 0, end = 0, minLen = t.length() + 1;
+            int curCount = 0, tCount = tMap.size();
+            boolean b = false;
+            HashMap<Character, Integer> sMap = new HashMap<>();
+            final int sLen = s.length();
+            while (start < sLen && end < sLen) {
+                Integer tv;
+                char c = s.charAt(b ? start : end);
+                if ((tv = tMap.get(c)) == null) {
+                    continue;
+                }
+
+                Integer sv = sMap.get(c);
+                if (sv == null) {
+                    sv = 0;
+                }
+                if ((++sv).equals(tv)) {
+                    ++curCount;
+                }
+                sMap.put(c, sv);
+
+                if (curCount == tCount) {
+                    int curLen = end - start + 1;
+                    if (curLen < minLen) {
+                        minLen = curLen;
+                    }
+                    ++start;
+
+                } else {
+                    ++end;
+
+                }
+
+            }
+
+
+            return null;
+        }
+
+        public List<List<Integer>> combine(int n, int k) { // 77
+            List<List<Integer>> ret = new ArrayList<>();
+            combine77(1, n, k, new ArrayList<>(k), ret);
+            return ret;
+        }
+
+        void combine77(int start, int n, int k, List<Integer> tmp, List<List<Integer>> ret) {
+            int tSize = tmp.size();
+            if (tSize == k) {
+                ret.add(new ArrayList<>(tmp));
+                return;
+            }
+            for (int i = start; i <= n; ++i) {
+                if (n - i + 1 < k - tSize)
+                    return;
+                tmp.add(i);
+                combine77(i + 1, n, k, tmp, ret);
+                tmp.remove(tmp.size() - 1);
+            }
+        }
+
+        public List<List<Integer>> subsets(int[] nums) { // 78
+            Arrays.sort(nums);
+            int len = nums.length;
+            List<List<Integer>> ret = new ArrayList<>();
+            ret.add(new ArrayList<>());
+            int start = 0;
+            for (int i = 0; i < len; ++i) {
+                int end = ret.size();
+                subsets78(nums, start, ret);
+                start = end;
+            }
+            return ret;
+        }
+
+        void subsets78(int[] nums, int start, List<List<Integer>> ret) {
+            int len = nums.length;
+            int end = ret.size();
+            for (int i = start; i < end; ++i) {
+                List<Integer> base = ret.get(i);
+                int size = base.size();
+                int fromIdx = len + 1;
+                if (size == 0) {
+                    fromIdx = 0;
+                } else {
+                    int last = base.get(size - 1);
+                    int c = 0;
+                    for (int j = size - 2; j >= 0; --j) {
+                        if (base.get(j) == last)
+                            ++c;
+                        else
+                            break;
+                    }
+                    for (int j = 0; j < len; ++j) {
+                        if (last == nums[j]) {
+                            fromIdx = j + 1;
+                            break;
+                        }
+                    }
+                    fromIdx += c;
+                }
+
+                int pre = Integer.MIN_VALUE;
+                for (int j = fromIdx; j < len; ++j) {
+                    int n = nums[j];
+                    if (n == pre)
+                        continue;
+                    List<Integer> a = new ArrayList<>(size + 1);
+                    a.addAll(base);
+                    a.add(pre = n);
+                    ret.add(a);
+                }
+            }
+        }
+
+        public boolean exist(char[][] board, String word) {
+            char c0 = word.charAt(0);
+            int rCount = board.length;
+            boolean[][] used = new boolean[rCount][];
+            for (int i = 0; i < rCount; ++i) {
+                used[i] = new boolean[board[i].length];
+            }
+            for (int i = 0; i < rCount; ++i) {
+                int cCount = board[i].length;
+                for (int j = 0; j < cCount; j++) {
+                    if (board[i][j] == c0) {
+                        used[i][j] = true;
+                        if (exist79(1, i, j, used, board, word))
+                            return true;
+                        else
+                            used[i][j] = false;
+                    }
+                }
+            }
+            return false;
+        }
+
+        boolean exist79(int wk, int kRow, int kCol, boolean[][] used, char[][] board, String word) {
+            if (wk == word.length())
+                return true;
+            for (int d = 0; d < 4; ++d) {
+                if (exist79_find4(d, wk, kRow, kCol, used, board, word)) {
+                    int kRow1 = kRow, kCol1 = kCol;
+                    if (d == 0)
+                        --kRow1;
+                    else if (d == 1)
+                        ++kRow1;
+                    else if (d == 2)
+                        --kCol1;
+                    else if (d == 3)
+                        ++kCol1;
+                    used[kRow1][kCol1] = true;
+                    if (wk + 1 == word.length())
+                        return true;
+                    if (exist79(wk + 1, kRow1, kCol1, used, board, word))
+                        return true;
+                    else
+                        used[kRow1][kCol1] = false;
+                }
+            }
+            return false;
+        }
+
+        boolean exist79_find4(int d, int wk, int kRow, int kCol, boolean[][] used, char[][] board, String word) {
+            int cRow, cCol;
+            char c = word.charAt(wk);
+            if (d == 0) {
+                cRow = kRow - 1;
+                cCol = kCol;
+                if (cRow >= 0 && cCol >= 0 && !used[cRow][cCol]) {
+                    if (board[cRow][cCol] == c)
+                        return true;
+                }
+            } else if (d == 1) {
+                cRow = kRow + 1;
+                cCol = kCol;
+                if (cRow < board.length && cCol >= 0 && !used[cRow][cCol]) {
+                    if (board[cRow][cCol] == c)
+                        return true;
+                }
+            } else if (d == 2) {
+                cRow = kRow;
+                cCol = kCol - 1;
+                if (cCol >= 0 && cRow >= 0 && !used[cRow][cCol]) {
+                    if (board[cRow][cCol] == c)
+                        return true;
+                }
+            } else if (d == 3) {
+                cRow = kRow;
+                cCol = kCol + 1;
+                if (cRow >= 0 && cCol < board[cRow].length && !used[cRow][cCol]) {
+                    if (board[cRow][cCol] == c)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        public int removeDuplicates80(int[] nums) { // 80
+            int newLen = nums.length;
+            int dup = 0;
+            int i = 2;
+            for (; i < newLen; ++i) {
+                if (nums[i] == nums[i - 2])
+                    ++dup;
+                else if (dup > 0) {
+                    System.arraycopy(nums, i, nums, i - dup, newLen - i);
+                    newLen -= dup;
+                    i -= dup;
+                    dup = 0;
+                }
+            }
+            if (dup > 0) {
+                --i;
+                System.arraycopy(nums, i, nums, i - dup, newLen - i);
+                newLen -= dup;
+            }
+            return newLen;
+        }
+
+
     }
 
     public static void main(String[] args) {
@@ -2744,10 +3122,46 @@ public class Main {
 //        System.out.println(solution.mySqrt(2147483647));
 //        System.out.println(Math.sqrt(2147483647));
 
-        System.out.println(solution.climbStairs(45));
-        System.out.println(solution.climbStairs2(45));
-        System.out.println(solution.climbStairs3(45));
+//        System.out.println(solution.climbStairs(45));
+//        System.out.println(solution.climbStairs2(45));
+//        System.out.println(solution.climbStairs3(45));
 
+//        System.out.println(solution.simplifyPath("/a/./b/../../c/"));
+
+//        System.out.println(solution.minDistance("intention", "execution"));
+
+//        int[][] matrix = {{0, 1, 2, 0}, {3, 4, 5, 2}, {1, 3, 1, 5}};
+//        solution.setZeroes(matrix);
+//        System.out.println(Arrays.deepToString(matrix));
+
+//        int[][] matrix = {{1, 3, 5, 7}, {10, 11, 16, 20}, {23, 30, 34, 50}};
+//        System.out.println(solution.searchMatrix(matrix, -1));
+
+//        int[] nums = {1};
+//        solution.sortColors(nums);
+//        System.out.println(Arrays.toString(nums));
+
+//        System.out.println(solution.minWindow("ADOBECODEBANC", "ABC")); // TODO
+
+//        System.out.println(solution.combine(1, 1));
+
+//        System.out.println(solution.subsets(new int[]{1, 2, 2, 3}));
+
+//        char[][] board = //{{'A'}};
+//                {
+//                        {'C', 'A', 'A'},
+//                        {'A', 'A', 'A'},
+//                        {'B', 'C', 'D'}
+//                };
+//        System.out.println(solution.exist(board, "AAB"));
+
+        int[] nums = new int[]{0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3,3,4,4,4,4};
+        int r = solution.removeDuplicates80(nums);
+        System.out.println(r);
+        for (int i = 0; i < r; i++) {
+            System.out.print(nums[i] + ",");
+        }
+        System.out.println();
     }
 
 
